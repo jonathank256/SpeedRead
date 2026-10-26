@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Speed Reader</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main>
+    <h1>Speed Reader</h1>
+
+    <label class="file">
+      <input type="file" id="file" accept="application/pdf">
+      <span id="file-label">Choose a PDF</span>
+    </label>
+
+    <div class="stage" aria-live="off">
+      <div class="guide"></div>
+      <div class="word" id="word">
+        <span class="before" id="before"></span><span class="focus" id="focus"></span><span class="after" id="after"></span>
+      </div>
+      <div class="guide"></div>
+    </div>
+
+    <input type="range" id="progress" min="0" max="0" value="0" aria-label="Position in text">
+    <p class="status" id="status">No document loaded</p>
+
+    <div class="controls">
+      <button id="back" title="Back 10 words (←)">« 10</button>
+      <button id="play" disabled>Play</button>
+      <button id="forward" title="Forward 10 words (→)">10 »</button>
+    </div>
+
+    <label class="wpm">
+      <span><strong id="wpm-value">300</strong> words per minute</span>
+      <input type="range" id="wpm" min="50" max="750" step="25" value="300">
+    </label>
+
+    <p class="hint">Space: play/pause · ← →: skip 10 words · ↑ ↓: speed ±25</p>
+  </main>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>

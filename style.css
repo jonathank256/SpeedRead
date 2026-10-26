@@ -1,0 +1,90 @@
+:root {
+  --bg: #f7f5f0;
+  --text: #1d1d1f;
+  --muted: #6b6b70;
+  --line: #d6d3cc;
+  --accent: #d1343e;
+  --panel: #ffffff;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #161618;
+    --text: #ececec;
+    --muted: #9a9aa0;
+    --line: #36363a;
+    --accent: #ff5a63;
+    --panel: #202023;
+  }
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, sans-serif;
+}
+
+main {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 32px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+h1 { font-size: 1.25rem; margin: 0; }
+
+.file input { display: none; }
+.file span {
+  display: inline-block;
+  padding: 8px 14px;
+  border: 1px dashed var(--line);
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+/* The reading area. Three equal columns keep the focus letter at the exact centre. */
+.stage {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 0 16px;
+}
+.guide {
+  height: 14px;
+  width: 2px;
+  margin: 0 auto;
+  background: var(--line);
+}
+.word {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  font: 500 clamp(2rem, 7vw, 3rem) / 1.6 Georgia, "Times New Roman", serif;
+  min-height: 1.6em;
+}
+.before { justify-self: end; }
+.after  { justify-self: start; }
+.focus  { color: var(--accent); }
+
+#progress, .wpm input { width: 100%; }
+
+.status { margin: -12px 0 0; color: var(--muted); font-size: 0.875rem; }
+
+.controls { display: flex; gap: 8px; justify-content: center; }
+button {
+  font: inherit;
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--text);
+  cursor: pointer;
+}
+button:disabled { opacity: 0.5; cursor: default; }
+#play { min-width: 90px; }
+
+.wpm { display: flex; flex-direction: column; gap: 6px; }
+.hint { color: var(--muted); font-size: 0.8rem; text-align: center; margin: 0; }
