@@ -2,7 +2,7 @@
 // Webpage imports due to Node application.
 import * as pdfjsLib from "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/build/pdf.min.mjs";
 import { extractText } from "./extract.js";
-import { toWords, splitAtFocus, wordDelay } from "./reader.js";
+import { toWords, splitAtFocus, wordDelay, findChapters } from "./reader.js";
 
 pdfjsLib.GlobalWorkerOptions.workerSrc =
   "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/build/pdf.worker.min.mjs";
@@ -13,11 +13,12 @@ const ui = {
   before: $("before"), focus: $("focus"), after: $("after"),
   progress: $("progress"), status: $("status"),
   play: $("play"), back: $("back"), forward: $("forward"),
-  wpm: $("wpm"), wpmValue: $("wpm-value"),
+  wpm: $("wpm"), wpmValue: $("wpm-value"), chapters: $("chapters"),
 };
 
 const state = {
   words: [],
+  chapters: [], // stores [{ label, index }] from findChapters
   index: 0, // word currently on screen
   playing: false,
   timer: null,
@@ -36,6 +37,16 @@ function showWord() {
   ui.progress.value = state.index; // uses direct index from state to determine total progress
   const n = state.words.length; // progress through document
   ui.status.textContent = n ? `Word ${state.index + 1} of ${n}` : "No document loaded";
+  showChapter();
+}
+
+// Keep the dropdown set to the chapter you're currently in.
+function showChapter() {
+  let current = -1;
+  for (const [i, ch] of state.chapters.entries()) {
+    if (ch.index <= state.index) current = i;
+  }
+  ui.chapters.value = String(current);
 }
 
 // ---------- playback ----------
@@ -95,10 +106,14 @@ async function loadPdf(file) {
   ui.play.disabled = true;
   try {
     const data = new Uint8Array(await file.arrayBuffer());
-    state.words = toWords(await extractText(pdfjsLib, data));
+    const text = await extractText(pdfjsLib, data);
+    state.words = toWords(text);
+    state.chapters = findChapters(text);
   } catch (err) {
     console.error(err);
     state.words = [];
+    state.chapters = [];
+    fillChapterList();
     ui.status.textContent = "Unable to read the given PDF.";
     return;
   }
@@ -106,10 +121,19 @@ async function loadPdf(file) {
     ui.status.textContent = "No text found in this PDF.";
     return;
   }
+  fillChapterList();
   state.index = 0;
   ui.progress.max = state.words.length - 1;
   ui.play.disabled = false;
   showWord();
+}
+
+function fillChapterList() {
+  ui.chapters.replaceChildren(
+    new Option("Beginning", "-1"),
+    ...state.chapters.map((ch, i) => new Option(ch.label, String(i))),
+  );
+  ui.chapters.hidden = state.chapters.length === 0;
 }
 
 // ---------- events ----------
@@ -123,6 +147,11 @@ ui.back.addEventListener("click", () => seek(state.index - 10));
 ui.forward.addEventListener("click", () => seek(state.index + 10));
 ui.progress.addEventListener("input", () => seek(Number(ui.progress.value)));
 ui.wpm.addEventListener("input", () => setWpm(ui.wpm.value));
+ui.chapters.addEventListener("change", () => {
+  const i = Number(ui.chapters.value);
+  seek(i < 0 ? 0 : state.chapters[i].index);
+  ui.chapters.blur(); // to return keyboard focus to speed controls
+});
 
 document.addEventListener("keydown", (e) => {
   if (e.target.tagName === "INPUT" && e.target.type !== "range") return;
