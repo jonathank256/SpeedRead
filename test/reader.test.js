@@ -25,3 +25,9 @@ test("cleanText joins hyphenated line breaks and ligatures", () => {
   assert.equal(cleanText("classi-\nfication of ﬁles"), "classification of files");
   assert.equal(cleanText("Leave-One-Subject"), "Leave-One-Subject");
 });
+test("focus ignores punctuation at the edges of a word", () => {
+  assert.equal(focusIndex("participants,"), focusIndex("participants"));
+  assert.equal(focusIndex("(the"), 1 + focusIndex("the"));
+  assert.equal(focusIndex('"Stop!"'), 1 + focusIndex("Stop"));
+  assert.equal(focusIndex("twenty-four"), 3); // inner hyphen counts as part of the word
+});
